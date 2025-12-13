@@ -140,13 +140,13 @@ FROM telco;
 /* ------------------------------------------------------------
    11) Churn rate by tenure group
    Notes:
-   - Biggest churn occurs in early tenure (0–6 months).
+   - Biggest churn occurs in early tenure (0-6 months).
    ------------------------------------------------------------ */
 SELECT
     CASE
-        WHEN tenure BETWEEN 0 AND 6 THEN '0–6 months'
-        WHEN tenure BETWEEN 7 AND 12 THEN '7–12 months'
-        WHEN tenure BETWEEN 13 AND 24 THEN '13–24 months'
+        WHEN tenure BETWEEN 0 AND 6 THEN '0-6 months'
+        WHEN tenure BETWEEN 7 AND 12 THEN '7-12 months'
+        WHEN tenure BETWEEN 13 AND 24 THEN '13-24 months'
         ELSE '24+ months'
     END AS tenure_group,
     ROUND(AVG(churns) * 100, 2) AS churn_rate_pct,
@@ -160,7 +160,7 @@ ORDER BY churn_rate_pct DESC;
    12) Which services are commonly missing for churners?
    Notes:
    - Percentages among churners only (WHERE churns = 1).
-   - Using COUNT(*) as the denominator (fixes the earlier COUNT(8) typo).
+   - Using COUNT(*) as the denominator.
    ------------------------------------------------------------ */
 SELECT
     ROUND(100 * SUM(CASE WHEN TechSupport = 'No' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_no_tech_support,
@@ -189,7 +189,7 @@ WHERE churns = 1;
 
 
 /* ------------------------------------------------------------
-   14) Base risk score (0–4)
+   14) Base risk score (0-4)
    Signals:
    - Month-to-month, Fiber optic, Electronic check, No tech support
    ------------------------------------------------------------ */
@@ -218,7 +218,7 @@ LIMIT 5;
 
 
 /* ------------------------------------------------------------
-   15) Extended risk score (0–7)
+   15) Extended risk score (0-7)
    Added signals:
    - tenure <= 6
    - OnlineSecurity = 'No'
@@ -296,6 +296,7 @@ ORDER BY churn_rate_pct DESC;
    18) Monthly revenue at risk (risk_score >= 5)
    Notes:
    - “Revenue at risk” uses SUM(MonthlyCharges) among high-risk customers.
+   - FIX: risk_score must be computed in the subquery to filter on it.
    ------------------------------------------------------------ */
 SELECT
     ROUND(SUM(MonthlyCharges), 2) AS monthly_revenue_at_risk
