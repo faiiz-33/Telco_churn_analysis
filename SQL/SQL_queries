@@ -1,1 +1,349 @@
+/* ============================================================
+   TELCO CHURN ANALYSIS (SQL)
+   Table: telco
+   churns: 0 = No churn, 1 = Churn
+   ============================================================ */
 
+
+/* ------------------------------------------------------------
+   1) Overall churn rate
+   ------------------------------------------------------------ */
+SELECT
+    ROUND(AVG(churns) * 100, 2) AS churn_rate_pct
+FROM telco;
+
+
+/* ------------------------------------------------------------
+   2) Churn rate by Contract
+   Notes:
+   - Month-to-month shows the highest churn in your findings.
+   ------------------------------------------------------------ */
+SELECT
+    Contract,
+    ROUND(AVG(churns) * 100, 2) AS churn_rate_pct,
+    COUNT(*) AS customers
+FROM telco
+GROUP BY Contract
+ORDER BY churn_rate_pct DESC;
+
+
+/* ------------------------------------------------------------
+   3) Churn rate by Payment Method
+   Notes:
+   - Electronic check is the highest churn payment method.
+   ------------------------------------------------------------ */
+SELECT
+    PaymentMethod,
+    ROUND(AVG(churns) * 100, 2) AS churn_rate_pct,
+    COUNT(*) AS customers
+FROM telco
+GROUP BY PaymentMethod
+ORDER BY churn_rate_pct DESC;
+
+
+/* ------------------------------------------------------------
+   4) Churn rate by Internet Service
+   Notes:
+   - Fiber optic has the highest churn.
+   ------------------------------------------------------------ */
+SELECT
+    InternetService,
+    ROUND(AVG(churns) * 100, 2) AS churn_rate_pct,
+    COUNT(*) AS customers
+FROM telco
+GROUP BY InternetService
+ORDER BY churn_rate_pct DESC;
+
+
+/* ------------------------------------------------------------
+   5) Churn rate by Tech Support
+   Notes:
+   - Customers without tech support churn far more.
+   ------------------------------------------------------------ */
+SELECT
+    TechSupport,
+    ROUND(AVG(churns) * 100, 2) AS churn_rate_pct,
+    COUNT(*) AS customers
+FROM telco
+GROUP BY TechSupport
+ORDER BY churn_rate_pct DESC;
+
+
+/* ------------------------------------------------------------
+   6) Average tenure by churn (months)
+   Notes:
+   - Non-churners stay much longer.
+   ------------------------------------------------------------ */
+SELECT
+    churns,
+    ROUND(AVG(tenure), 2) AS avg_tenure_months,
+    COUNT(*) AS customers
+FROM telco
+GROUP BY churns;
+
+
+/* ------------------------------------------------------------
+   7) Spending comparison: churners vs non-churners
+   Notes:
+   - Churners tend to pay more monthly, but have lower total charges
+     due to shorter tenure.
+   ------------------------------------------------------------ */
+SELECT
+    churns,
+    ROUND(AVG(MonthlyCharges), 2) AS avg_monthly_spend,
+    ROUND(AVG(TotalCharges), 2) AS avg_total_spend,
+    ROUND(AVG(tenure), 2) AS avg_tenure_months,
+    COUNT(*) AS customer_count
+FROM telco
+GROUP BY churns;
+
+
+/* ------------------------------------------------------------
+   8) High-churn customer segments (InternetService + Contract + PaymentMethod)
+   Notes:
+   - HAVING COUNT(*) > 50 keeps results statistically meaningful.
+   ------------------------------------------------------------ */
+SELECT
+    InternetService,
+    Contract,
+    PaymentMethod,
+    ROUND(AVG(churns) * 100, 2) AS churn_rate_pct,
+    COUNT(*) AS total_customers
+FROM telco
+GROUP BY InternetService, Contract, PaymentMethod
+HAVING COUNT(*) > 50
+ORDER BY churn_rate_pct DESC;
+
+
+/* ------------------------------------------------------------
+   9) Highest paying customers (TotalCharges)
+   Notes:
+   - Uses window function (MySQL 8+).
+   ------------------------------------------------------------ */
+SELECT
+    customerID,
+    TotalCharges,
+    RANK() OVER (ORDER BY TotalCharges DESC) AS charge_rank
+FROM telco;
+
+
+/* ------------------------------------------------------------
+   10) Highest paying customers (MonthlyCharges)
+   ------------------------------------------------------------ */
+SELECT
+    customerID,
+    MonthlyCharges,
+    RANK() OVER (ORDER BY MonthlyCharges DESC) AS monthly_rank
+FROM telco;
+
+
+/* ------------------------------------------------------------
+   11) Churn rate by tenure group
+   Notes:
+   - Biggest churn occurs in early tenure (0–6 months).
+   ------------------------------------------------------------ */
+SELECT
+    CASE
+        WHEN tenure BETWEEN 0 AND 6 THEN '0–6 months'
+        WHEN tenure BETWEEN 7 AND 12 THEN '7–12 months'
+        WHEN tenure BETWEEN 13 AND 24 THEN '13–24 months'
+        ELSE '24+ months'
+    END AS tenure_group,
+    ROUND(AVG(churns) * 100, 2) AS churn_rate_pct,
+    COUNT(*) AS customers
+FROM telco
+GROUP BY tenure_group
+ORDER BY churn_rate_pct DESC;
+
+
+/* ------------------------------------------------------------
+   12) Which services are commonly missing for churners?
+   Notes:
+   - Percentages among churners only (WHERE churns = 1).
+   - Using COUNT(*) as the denominator (fixes the earlier COUNT(8) typo).
+   ------------------------------------------------------------ */
+SELECT
+    ROUND(100 * SUM(CASE WHEN TechSupport = 'No' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_no_tech_support,
+    ROUND(100 * SUM(CASE WHEN OnlineSecurity = 'No' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_no_online_security,
+    ROUND(100 * SUM(CASE WHEN DeviceProtection = 'No' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_no_device_protection,
+    ROUND(100 * SUM(CASE WHEN OnlineBackup = 'No' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_no_online_backup
+FROM telco
+WHERE churns = 1;
+
+
+/* ------------------------------------------------------------
+   13) Avg revenue lost per churner (proxy)
+   Notes:
+   - Uses average TotalCharges of churners as an estimate.
+   ------------------------------------------------------------ */
+SELECT
+    ROUND(AVG(TotalCharges), 2) AS avg_revenue_lost_per_churner
+FROM telco
+WHERE churns = 1;
+
+
+/* ============================================================
+   RISK SCORING (SQL)
+   Goal: flag non-churned customers who look like churners
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   14) Base risk score (0–4)
+   Signals:
+   - Month-to-month, Fiber optic, Electronic check, No tech support
+   ------------------------------------------------------------ */
+SELECT *
+FROM (
+    SELECT
+        customerID,
+        Contract,
+        InternetService,
+        PaymentMethod,
+        TechSupport,
+        MonthlyCharges,
+        churns,
+        (
+            (Contract = 'Month-to-month') +
+            (InternetService = 'Fiber optic') +
+            (PaymentMethod = 'Electronic check') +
+            (TechSupport = 'No')
+        ) AS risk_score
+    FROM telco
+) t
+WHERE churns = 0
+  AND risk_score = 4
+ORDER BY MonthlyCharges DESC
+LIMIT 5;
+
+
+/* ------------------------------------------------------------
+   15) Extended risk score (0–7)
+   Added signals:
+   - tenure <= 6
+   - OnlineSecurity = 'No'
+   - MonthlyCharges > 75
+   ------------------------------------------------------------ */
+SELECT *
+FROM (
+    SELECT
+        customerID,
+        Contract,
+        InternetService,
+        PaymentMethod,
+        TechSupport,
+        OnlineSecurity,
+        tenure,
+        MonthlyCharges,
+        churns,
+        (
+            (Contract = 'Month-to-month') +
+            (InternetService = 'Fiber optic') +
+            (PaymentMethod = 'Electronic check') +
+            (TechSupport = 'No') +
+            (tenure <= 6) +
+            (OnlineSecurity = 'No') +
+            (MonthlyCharges > 75)
+        ) AS risk_score
+    FROM telco
+) t
+WHERE churns = 0
+ORDER BY risk_score DESC, MonthlyCharges DESC
+LIMIT 5;
+
+
+/* ------------------------------------------------------------
+   16) Risk score distribution (all customers)
+   Notes:
+   - Useful for “how many customers are high risk?”
+   ------------------------------------------------------------ */
+SELECT
+    risk_score,
+    COUNT(*) AS customers
+FROM (
+    SELECT
+        (
+            (Contract = 'Month-to-month') +
+            (InternetService = 'Fiber optic') +
+            (PaymentMethod = 'Electronic check') +
+            (TechSupport = 'No') +
+            (tenure <= 6) +
+            (OnlineSecurity = 'No') +
+            (MonthlyCharges > 75)
+        ) AS risk_score
+    FROM telco
+) s
+GROUP BY risk_score
+ORDER BY risk_score DESC;
+
+
+/* ------------------------------------------------------------
+   17) Churn rate by (Contract + InternetService)
+   Notes:
+   - Confirms worst combos like Month-to-month + Fiber.
+   ------------------------------------------------------------ */
+SELECT
+    Contract,
+    InternetService,
+    ROUND(AVG(churns) * 100, 2) AS churn_rate_pct,
+    COUNT(*) AS customers
+FROM telco
+GROUP BY Contract, InternetService
+ORDER BY churn_rate_pct DESC;
+
+
+/* ------------------------------------------------------------
+   18) Monthly revenue at risk (risk_score >= 5)
+   Notes:
+   - “Revenue at risk” uses SUM(MonthlyCharges) among high-risk customers.
+   ------------------------------------------------------------ */
+SELECT
+    ROUND(SUM(MonthlyCharges), 2) AS monthly_revenue_at_risk
+FROM (
+    SELECT
+        MonthlyCharges,
+        (
+            (Contract = 'Month-to-month') +
+            (InternetService = 'Fiber optic') +
+            (PaymentMethod = 'Electronic check') +
+            (TechSupport = 'No') +
+            (tenure <= 6) +
+            (OnlineSecurity = 'No') +
+            (MonthlyCharges > 75)
+        ) AS risk_score
+    FROM telco
+) t
+WHERE risk_score >= 5;
+
+
+/* ------------------------------------------------------------
+   19) Churn drivers table (summary)
+   Notes:
+   - Compares churners vs non-churners across key signals.
+   ------------------------------------------------------------ */
+SELECT
+    churns,
+    ROUND(AVG(tenure), 2) AS avg_tenure,
+    ROUND(AVG(MonthlyCharges), 2) AS avg_monthly_charge,
+    ROUND(AVG(risk_score), 2) AS avg_risk_score,
+    SUM(CASE WHEN Contract = 'Month-to-month' THEN 1 ELSE 0 END) AS month_to_month_count,
+    SUM(CASE WHEN InternetService = 'Fiber optic' THEN 1 ELSE 0 END) AS fiber_optic_count
+FROM (
+    SELECT
+        churns,
+        tenure,
+        MonthlyCharges,
+        Contract,
+        InternetService,
+        (
+            (Contract = 'Month-to-month') +
+            (InternetService = 'Fiber optic') +
+            (PaymentMethod = 'Electronic check') +
+            (TechSupport = 'No') +
+            (tenure <= 6) +
+            (OnlineSecurity = 'No') +
+            (MonthlyCharges > 75)
+        ) AS risk_score
+    FROM telco
+) t
+GROUP BY churns;
