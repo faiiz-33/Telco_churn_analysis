@@ -24,10 +24,10 @@ Churn Breakdown
 
 By Contract Type
 
-Contract	Churn Rate
-Month-to-month	42.7%
-One year	11.3%
-Two years	2.8%
+Contract |	Churn Rate
+Month-to-month|	42.7%
+One year |	11.3%
+Two years |	2.8%
 
 ✅ Month-to-month customers churn at a much higher rate.
 
