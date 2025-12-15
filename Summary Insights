@@ -1,1 +1,101 @@
+Telco Customer Churn – Summary Insights
 
+This analysis combines SQL, Python, and Power BI to understand who churns, why they churn, and the financial impact of churn.
+The findings follow a logical progression from overall churn, to drivers, to risk identification.
+
+⸻
+
+1. Overall Churn Landscape
+	•	Overall churn rate: ~26.6%
+	•	Churn is not evenly distributed; it is concentrated in specific customer segments and early tenure.
+
+⸻
+
+2. When Do Customers Churn?
+	•	Early churn is dominant:
+	•	0–6 months: ~53% churn
+	•	Churn steadily decreases as tenure increases.
+	•	Average tenure:
+	•	Churned customers: ~18 months
+	•	Retained customers: ~38 months
+
+Insight: The first 6 months are the most critical retention window.
+
+⸻
+
+3. Strongest Churn Drivers (Categorical)
+
+Across SQL validation and Python (Cramér’s V):
+
+High-impact drivers
+	•	Contract type:
+	•	Month-to-month customers churn at ~43%
+	•	Payment method:
+	•	Electronic check churns at ~45% (highest of all methods)
+	•	Internet service:
+	•	Fiber optic users churn at ~42%
+	•	Support & security:
+	•	No TechSupport → ~42% churn
+	•	No OnlineSecurity → ~42% churn
+
+Low-impact / weak drivers
+	•	Phone service
+	•	Number of lines
+	•	Some add-ons (moderate effect only)
+
+Insight: Churn is driven more by service type, contract flexibility, and lack of support/security than by basic phone features.
+
+⸻
+
+4. Spending Behavior of Churners
+	•	Churners:
+	•	Pay more per month
+	•	Generate lower total revenue due to short tenure
+	•	Avg comparison:
+	•	MonthlyCharges: higher for churners
+	•	TotalCharges: significantly lower for churners
+
+Insight: High monthly price alone doesn’t cause churn — short tenure is the real value killer.
+
+⸻
+
+5. High-Risk Customer Segments
+
+A clear high-risk segment emerges repeatedly:
+
+Month-to-month + Electronic check + Fiber optic
+
+	•	~60% churn rate
+	•	Large enough segment to matter commercially
+
+Insight: This segment represents the most immediate churn risk and retention opportunity.
+
+⸻
+
+6. Risk Scoring Validation
+
+A SQL-based risk score was built using key churn drivers.
+
+Findings:
+	•	Customers with higher risk scores churn significantly more.
+	•	Removing MonthlyCharges from the score improved model performance (validated via AUC).
+	•	Final score focuses on behavioral and service-related drivers, not raw price.
+
+Insight: Simple, interpretable risk scoring is effective when features are carefully selected.
+
+⸻
+
+7. Revenue Impact
+	•	Avg revenue lost per churner: ~$1,530
+	•	Monthly revenue at risk (high-risk customers): ~$168K
+
+Insight: Even small churn reductions in high-risk segments can yield meaningful revenue gains.
+
+⸻
+
+Final Business Takeaways
+	1.	Churn happens early — retention efforts must focus on the first 6 months.
+	2.	Month-to-month, fiber optic, and electronic check customers are the highest risk.
+	3.	Support and security add-ons matter more than price alone.
+	4.	Risk scoring works best when redundant price signals are removed.
+	5.	Targeted interventions in a few key segments can significantly reduce churn and revenue loss.
