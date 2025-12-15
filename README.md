@@ -9,24 +9,25 @@ The goal is to understand who churns, why they churn, and the financial impact o
 
 Repository Structure
 
-├── Data/
-│   ├── raw.csv
-│   └── clean.csv
-│
-├── SQL/
-│   ├── Queries.sql
-│   └── README.md
-│
-├── Python/
-│   └── Telco_churn.ipynb
-│
-├── Power BI/
-│   ├── churners_profile.png
-│   ├── churn_overview.png
-│   └── README.md
-│
-├── Summary insights.md
-└── README.md
+Data/   
+raw.csv
+clean.csv
+
+SQL/    
+Queries.sql
+README.md
+
+Python/  
+Telco_churn.ipynb
+
+Power BI/  
+churners_profile.png
+churn_overview.png
+README.md
+
+Summary/  
+insights.md
+README.md
 
 
 ⸻
