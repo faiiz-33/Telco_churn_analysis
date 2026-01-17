@@ -47,7 +47,7 @@ Cleaned and prepared dataset used across SQL, Python, and Power BI.
 
 SQL Analysis  
 
-Folder: SQL/
+Folder: SQL/  
 	•	Queries.sql
 Contains all SQL queries used for:
 	•	Data exploration
@@ -64,28 +64,23 @@ SQL was used as the primary analytical engine for logic validation and metric ac
 
 ⸻
 
-Perfect — here’s the small, precise update to the repo README that reflects that work without making it long or messy.
-You only need to replace the Python Analysis section with this version.
-
-⸻
-
 Python Analysis  
 
-Folder: Python/
-	•	Telco_churn.ipynb
+Folder: Python/  
+	•	Telco_churn.ipynb  
 
 Python was used for feature relevance validation and exploratory analysis before building the Power BI dashboard.
 
-Key work includes:
-	•	Computing Cramér’s V scores for all categorical variables to quantify their relationship with churn
-→ Results were used to decide which categorical features to visualize in Power BI.
-	•	Creating two heatmaps:
-	•	One for numerical features (correlation matrix)
-	•	One for categorical features using Cramér’s V
-	•	Visual exploration of numerical variables (MonthlyCharges and TotalCharges) to assess their impact on churn.
+Key work includes:  
+	•	Computing Cramér’s V scores for all categorical variables to quantify their relationship with churn.    
+→ Results were used to decide which categorical features to visualize in Power BI.  
+	•	Creating two heatmaps:  
+	•	One for numerical features (correlation matrix)  
+	•	One for categorical features using Cramér’s V  
+	•	Visual exploration of numerical variables (MonthlyCharges and TotalCharges) to assess their impact on churn.  
 
-Note:
-All Python-derived insights are summarized as text at the bottom of the notebook to keep the analysis concise and readable.
+Note:  
+All Python-derived insights are summarized as text at the bottom of the notebook to keep the analysis concise and readable.  
 
 
 ⸻
