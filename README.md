@@ -31,7 +31,7 @@ Repository Structure
 ⸻
 
 Data
-
+```
 Folder: Data:  
 	•	raw.csv  
 Original Telco customer churn dataset.  
@@ -40,7 +40,7 @@ Cleaned and prepared dataset used across SQL, Python, and Power BI.
 	•	Fixed data types  
 	•	Removed inconsistencies  
 	•	Created tenure groups, churn flags, and risk score  
-
+```
 ⸻
 
 SQL Analysis  
