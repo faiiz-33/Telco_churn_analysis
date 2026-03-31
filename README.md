@@ -44,7 +44,7 @@ Cleaned and prepared dataset used across SQL, Python, and Power BI.
 ⸻
 
 SQL Analysis  
-
+```
 Folder: SQL:   
 	•	Queries.sql  
 Contains all SQL queries used for:  
@@ -59,11 +59,12 @@ Documents all insights derived from SQL, including:
 	•	Feature selection decisions  
 
 SQL was used as the primary analytical engine for logic validation and metric accuracy.  
-
+```
 ⸻
 
 Python Analysis  
 
+```
 Folder: Python:    
 	•	Telco_churn.ipynb    
 
@@ -79,12 +80,13 @@ Key work includes:
 
 Note:  
 All Python-derived insights are summarized as text at the bottom of the notebook to keep the analysis concise and readable.  
-
+```
 
 ⸻
 
 Power BI Dashboard  
 
+```
 Folder: Power BI:  
 
 Contains a two-page interactive dashboard:  
@@ -101,11 +103,11 @@ Page 2 – Churn Overview
 Explains dashboard design, visuals, and analytical intent.  
 	•	churners_profile.png, churn_overview.png  
 Dashboard screenshots for quick viewing without opening Power BI.  
-
+```
 ⸻
 
 Summary Insights:  
-
+```
 File: Summary insights.md  
 
 This file consolidates all key findings from:  
@@ -114,7 +116,7 @@ This file consolidates all key findings from:
 	•	Power BI  
 
 It provides a high-level executive summary  
-
+```
 ⸻
 
 Key Skills Demonstrated  
